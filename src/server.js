@@ -1,6 +1,8 @@
 require("express-async-errors");
 
+const cors = require("cors");
 const express = require("express");
+
 const AppError = require("./Utils/AppError");
 const routes = require("./Routes");
 const uploadConfig = require("./Configs/upload");
@@ -9,8 +11,12 @@ const uploadConfig = require("./Configs/upload");
 const app = express();
 app.use(express.json());
 
+//Connecting with FrontEnd
+app.use(cors());
+
 //Using routes
 app.use(routes);
+
 
 //Setting files saving
 app.use("/files", express.static(uploadConfig.UPLOAD_FOLDER));

@@ -9,13 +9,18 @@ class SessionsController {
     async create(request, response) {
         const { email, password } = request.body;
 
-        const user = await knex("users").where({ email }).first();
-        
-        if(!user) {
-            throw new AppError("Email e/ou senha incorretos");
+        if(!email || !password) {
+            throw new AppError("Preencha todos os campos.");
         }
+
+        const user = await knex("users").where({ email }).first();
+  
+        if(!user) {
+            throw new AppError("Email e/ou senha incorretos.");
+        }
+
+        const adminCheck = user.isAdmin;
         
-        const isAdmin = user.isAdmin;
         const passwordMatch = await compare(password, user.password);
 
         if(!passwordMatch) {
@@ -23,12 +28,12 @@ class SessionsController {
         }
 
         const { secret, expiresIn } = authConfig.jwt;
-        const token = sign({ isAdmin: user.isAdmin }, secret, {
+        const token = sign({}, secret, {
             subject: String(user.id),
             expiresIn
         })
 
-        return response.json({user, token})
+        return response.json({user, token, adminCheck})
     }
 }
 

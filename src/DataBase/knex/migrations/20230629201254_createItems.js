@@ -4,6 +4,7 @@ exports.up = knex => knex.schema.createTable("items", table => {
     table.text("description");
     table.text("image").nullable();
     table.decimal("price", 8, 3);
+    table.text("category");
     table.integer("user_id").references("id").inTable("users"); //forein key
  
     table.timestamp("created_at").default(knex.fn.now());

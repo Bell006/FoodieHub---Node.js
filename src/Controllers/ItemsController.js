@@ -3,11 +3,11 @@ const AppError = require("../Utils/AppError");
 
 class ItemsController {
     async Create(request, response) {
-        const { title, description, price, ingredients } = request.body;
+        const { title, description, price, ingredients, category } = request.body;
         const user_id = request.user.id;
 
-        if(!title || !description || !price || !ingredients ) {
-            throw new AppError("Todos os campos, tirando o de imagem, são obrigatórios.")
+        if(!title || !description || !price || !ingredients || !category) {
+            throw new AppError("Todos os campos são obrigatórios.")
         };
 
         await knex.transaction(async (trx) => {
@@ -20,7 +20,8 @@ class ItemsController {
             const [item_id] = await trx("items").insert({
                 title,
                 description,
-                price,
+                price: Number(price),
+                category,
                 user_id
             });
 
@@ -32,12 +33,12 @@ class ItemsController {
 
             await trx("ingredients").where({ item_id }).insert(ingredientsData);
 
-            return response.status(201).json("Item cadastrado com sucesso!");
+            return response.status(201).json(item_id);
         })
     }
 
     async Update(request, response) {
-        const { title, description, price, ingredients } = request.body;
+        const { title, description, price, ingredients, category } = request.body;
         const { item_id } = request.query;
         const user_id = request.user.id;
 
@@ -50,6 +51,7 @@ class ItemsController {
         item.title = title || item.title;
         item.description = description || item.description;
         item.price = price || item.price;
+        item.category = category || item.category;
 
         if(ingredients) {
             const ingredientsData = ingredients.map((ingredient) => ({
@@ -68,6 +70,7 @@ class ItemsController {
                 title,
                 description,
                 price,
+                category,
                 user_id
         });
 

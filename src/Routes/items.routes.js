@@ -16,7 +16,7 @@ const itemsController = new ItemsController();
 itemsRoutes.use(ensureAuthentication);
 
 itemsRoutes.post("/", itemsController.Create);
-itemsRoutes.patch("/img", upload.single("image"), itemImgController.update);
+itemsRoutes.patch("/img/:item_id", upload.single("image"), itemImgController.update);
 itemsRoutes.put("/update", itemsController.Update);
 itemsRoutes.get("/details", itemsController.Show);
 itemsRoutes.get("/index", itemsController.Index);

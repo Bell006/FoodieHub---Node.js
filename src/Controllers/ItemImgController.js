@@ -4,7 +4,7 @@ const DiskStorage = require("../Providers/DiskStorage");
 
 class ItemImgController {
     async update(request, response) {
-        const { item_id } = request.query;
+        const { item_id } = request.params;
         const imgFileName = request.file.filename;
 
         const diskStorage = new DiskStorage();
@@ -22,7 +22,7 @@ class ItemImgController {
         await diskStorage.saveFile(imgFileName);
 
         item.image = imgFileName;
-        await knex("items").update(item).where({ id: item_id });
+        await knex("items").where({ id: item_id }).update({ image: imgFileName });
 
         return response.json(item)
     };
