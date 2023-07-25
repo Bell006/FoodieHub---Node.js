@@ -4,12 +4,12 @@ const DiskStorage = require("../Providers/DiskStorage");
 
 class ItemImgController {
     async update(request, response) {
-        const { item_id } = request.params;
+        const { id } = request.params;
         const imgFileName = request.file.filename;
 
         const diskStorage = new DiskStorage();
 
-        const item = await knex("items").where({ id: item_id }).first();
+        const item = await knex("items").where({id}).first();
 
         if(!item) {
             throw new AppError("Item não encontrado", 401);
@@ -22,7 +22,7 @@ class ItemImgController {
         await diskStorage.saveFile(imgFileName);
 
         item.image = imgFileName;
-        await knex("items").where({ id: item_id }).update({ image: imgFileName });
+        await knex("items").where({id}).update({ image: imgFileName });
 
         return response.json(item)
     };

@@ -17,29 +17,29 @@ class ItemsController {
                 throw new AppError("Já existe um item cadastrado com o mesmo título.");
             };
 
-            const [item_id] = await trx("items").insert({
+            const [item] = await trx("items").insert({
                 title,
                 description,
                 price: Number(price),
                 category,
                 user_id
-            });
+            }).returning("*");
 
             const ingredientsData = ingredients.map((ingredient) => ({
                 name: ingredient,
-                item_id,
+                item_id: item.id,
                 user_id,
               }));
 
-            await trx("ingredients").where({ item_id }).insert(ingredientsData);
+            await trx("ingredients").where({ item_id: item.id }).insert(ingredientsData);
 
-            return response.status(201).json(item_id);
+            return response.status(201).json(item);
         })
     }
 
     async Update(request, response) {
         const { title, description, price, ingredients, category } = request.body;
-        const { item_id } = request.query;
+        const { id: item_id } = request.params;
         const user_id = request.user.id;
 
         const item = await knex("items").where({id: item_id}).first();
@@ -79,7 +79,7 @@ class ItemsController {
     }
 
     async Show(request, response) {
-        const { id } = request.query;
+        const { id } = request.params;
 
         const item = await knex("items").where({ id }).first();
 
@@ -93,6 +93,9 @@ class ItemsController {
 
     async Index(request, response) {
         const {title, ingredients} = request.query;
+        const user_id = request.user.id;
+        const adminCheck = request.user.adminCheck;
+  
         let items;
         
         if(ingredients) {
@@ -109,12 +112,18 @@ class ItemsController {
             .innerJoin("items", "items.id", "ingredients.item_id")
             .groupBy("items.id")
             .orderBy("items.title")
-        } else {
+        }else if(title){
             items = await knex("items")
             .whereLike("title", `%${title}%`) //adequando a pesquisa do titulo para não precisar ser exato
             .orderBy("title")  
+        } else if(adminCheck === 1 ){
+            items = await knex("items")
+            .where({user_id})
+            .orderBy("title")  
+        } else {
+            items = await knex("items")
+            .orderBy("title")  
         }
-
 
         const allIngredients = await knex.select().from("ingredients");
 
@@ -127,11 +136,11 @@ class ItemsController {
             }
         })
 
-        return response.status(201).json([itemsAndIngredients])
+        return [response.status(201).json(itemsAndIngredients)]
     }
 
     async Delete(request, response) {
-        const { id } = request.query;
+        const { id } = request.params;
 
         await knex("items").where({id}).delete();
 

@@ -13,14 +13,12 @@ const itemsRoutes = Router();
 const itemImgController = new ItemImgController();
 const itemsController = new ItemsController();
 
-itemsRoutes.use(ensureAuthentication);
-
-itemsRoutes.post("/", itemsController.Create);
-itemsRoutes.patch("/img/:item_id", upload.single("image"), itemImgController.update);
-itemsRoutes.put("/update", itemsController.Update);
-itemsRoutes.get("/details", itemsController.Show);
-itemsRoutes.get("/index", itemsController.Index);
-itemsRoutes.delete("/delete", itemsController.Delete);
+itemsRoutes.post("/", ensureAuthentication,itemsController.Create);
+itemsRoutes.patch("/img/:id", ensureAuthentication,upload.single("image"), itemImgController.update);
+itemsRoutes.put("/update/:id",ensureAuthentication, itemsController.Update);
+itemsRoutes.get("/details/:id", itemsController.Show);
+itemsRoutes.get("/index", ensureAuthentication,itemsController.Index);
+itemsRoutes.delete("/delete/:id", ensureAuthentication,itemsController.Delete);
 
 
 module.exports = itemsRoutes;

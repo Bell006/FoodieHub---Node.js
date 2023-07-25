@@ -19,16 +19,17 @@ class SessionsController {
             throw new AppError("Email e/ou senha incorretos.");
         }
 
-        const adminCheck = user.isAdmin;
+        const adminCheck = Number(user.isAdmin);
         
         const passwordMatch = await compare(password, user.password);
-
+        
         if(!passwordMatch) {
             throw new AppError("Email e/ou senha incorretos");
         }
-
+        
         const { secret, expiresIn } = authConfig.jwt;
-        const token = sign({}, secret, {
+        
+        const token = sign({ adminCheck }, secret, {
             subject: String(user.id),
             expiresIn
         })
